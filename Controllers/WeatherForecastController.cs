@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using wallets_api_wrapper.Auth;
 
 namespace wallets_api_wrapper.Controllers
 {
@@ -23,6 +24,7 @@ namespace wallets_api_wrapper.Controllers
             _logger = logger;
         }
 
+        [ApiKeyAuth]
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
