@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -15,9 +13,11 @@ namespace wallets_api_wrapper.Data
     {
         private IConfiguration _configuration { get; }
 
-        public AppRepository(IConfiguration configuration)
+        private ILogger _logger { get; }
+        public AppRepository(IConfiguration configuration, ILogger<AppRepository> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
         public CardDetails GetCardDetails(string cardBin)
         {
@@ -47,8 +47,7 @@ namespace wallets_api_wrapper.Data
             }
             catch (Exception ex)
             {
-                // Log Exception
-                Console.WriteLine(ex.Message);
+                _logger.LogError("An error occured", ex);
                 return null;
             }
         }

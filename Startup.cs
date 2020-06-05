@@ -1,18 +1,17 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using wallets_api_wrapper.Data;
 using Microsoft.Net.Http.Headers;
+using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
+using Microsoft.OpenApi.Models;
+using System.IO;
+using wallets_api_wrapper.Extensions;
 
 namespace wallets_api_wrapper
 {
@@ -22,23 +21,40 @@ namespace wallets_api_wrapper
         {
             Configuration = configuration;
         }
-
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IAppRepository, AppRepository>();
             services.AddControllers();
-        }
+            services.AddSwaggerGen(x => 
+            {
+                x.SwaggerDoc("v1", new OpenApiInfo{Title= "Wallets API Wrapper", Version = "v1" });
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+                x.ExampleFilters();
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                x.IncludeXmlComments(xmlPath);
+            });
+
+            services.AddSwaggerExamplesFromAssemblyOf<Startup>();
+        }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            var swaggerOptions = new SwaggerOptions();
+            Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
+
+            app.UseSwagger(option => { option.RouteTemplate = swaggerOptions.JsonRoute; });
+            app.UseSwaggerUI(option => 
+            {
+                option.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);
+            });
 
             app.UseHttpsRedirection();
 

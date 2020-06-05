@@ -1,15 +1,17 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using wallets_api_wrapper.Auth;
 using wallets_api_wrapper.Data;
+using wallets_api_wrapper.Models;
 
 namespace wallets_api_wrapper.Controllers
 {
     [ApiKeyAuth]
     [Route("[controller]")]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public class CardDetailsController : ControllerBase
     {
         private IAppRepository _repository { get; }
@@ -18,10 +20,16 @@ namespace wallets_api_wrapper.Controllers
         {
             _logger = logger;
             _repository = repository;
-
         }
-
+        
+        /// <summary>
+        /// Allows a user to retrieve the card details for the card pan entered
+        /// </summary>
+        /// <response code="200">Retrieves a particular card pan details</response>
+        /// <response code="400">Unable to retrieve card pan details due to validation error</response>
+        /// <response code="401">Unauthorized access (invalid or no access token provided)</response>
         [HttpGet("getCardDetails/{cardBin}")]
+        [ProducesResponseType(typeof(CardDetails), 200)]
         public IActionResult GetCardDetails(string cardBin)
         {
             if (cardBin.Length < 6 || cardBin.Length > 8)

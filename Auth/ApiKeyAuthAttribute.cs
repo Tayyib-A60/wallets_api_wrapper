@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace wallets_api_wrapper.Auth
 {
@@ -13,7 +14,7 @@ namespace wallets_api_wrapper.Auth
         private const string ApiKeyHeaderName = "ApiKey";
         async Task IAsyncActionFilter.OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if(!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var clientKey))
+            if (!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var clientKey))
             {
                 context.Result = new UnauthorizedResult();
                 return;
@@ -22,7 +23,7 @@ namespace wallets_api_wrapper.Auth
             var config = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
             var apiKey = config.GetValue<string>(key: ApiKeyHeaderName);
 
-            if(!apiKey.Equals(clientKey))
+            if (!apiKey.Equals(clientKey))
             {
                 context.Result = new UnauthorizedResult();
                 return;

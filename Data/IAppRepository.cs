@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using wallets_api_wrapper.Models;
 
 namespace wallets_api_wrapper.Data
